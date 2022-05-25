@@ -211,7 +211,7 @@ class DetectionLoader():
         for i in range(self.num_batches):
             imgs, orig_imgs, im_names, im_dim_list = self.wait_and_get(self.image_queue)
             if imgs is None or self.stopped:
-                self.wait_and_put(self.det_queue, (None, None, None, None, None, None, None))
+                self.wait_and_put(self.det_queue, (None, None, None, None, None, None, None, None))
                 return
 
             with torch.no_grad():
@@ -223,37 +223,40 @@ class DetectionLoader():
                 dets = self.detector.images_detection(imgs, im_dim_list)
                 if isinstance(dets, int) or dets.shape[0] == 0:
                     for k in range(len(orig_imgs)):
-                        self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], None, None, None, None, None))
+                        self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], None, None, None, None, None, None))
                     continue
                 if isinstance(dets, np.ndarray):
                     dets = torch.from_numpy(dets)
                 dets = dets.cpu()
                 boxes = dets[:, 1:5]
                 scores = dets[:, 5:6]
+                cls = dets[:, -1]
+
                 if self.opt.tracking:
                     ids = dets[:, 6:7]
+                    
                 else:
                     ids = torch.zeros(scores.shape)
 
             for k in range(len(orig_imgs)):
                 boxes_k = boxes[dets[:, 0] == k]
                 if isinstance(boxes_k, int) or boxes_k.shape[0] == 0:
-                    self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], None, None, None, None, None))
+                    self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], None, None, None, None, None, None))
                     continue
                 inps = torch.zeros(boxes_k.size(0), 3, *self._input_size)
                 cropped_boxes = torch.zeros(boxes_k.size(0), 4)
 
-                self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], boxes_k, scores[dets[:, 0] == k], ids[dets[:, 0] == k], inps, cropped_boxes))
+                self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], boxes_k, scores[dets[:, 0] == k], ids[dets[:, 0] == k], inps, cropped_boxes, cls))
 
     def image_postprocess(self):
         for i in range(self.datalen):
             with torch.no_grad():
-                (orig_img, im_name, boxes, scores, ids, inps, cropped_boxes) = self.wait_and_get(self.det_queue)
+                (orig_img, im_name, boxes, scores, ids, inps, cropped_boxes, cls) = self.wait_and_get(self.det_queue)
                 if orig_img is None or self.stopped:
-                    self.wait_and_put(self.pose_queue, (None, None, None, None, None, None, None))
+                    self.wait_and_put(self.pose_queue, (None, None, None, None, None, None, None, None))
                     return
                 if boxes is None or boxes.nelement() == 0:
-                    self.wait_and_put(self.pose_queue, (None, orig_img, im_name, boxes, scores, ids, None))
+                    self.wait_and_put(self.pose_queue, (None, orig_img, im_name, boxes, scores, ids, None, None))
                     continue
                 # imght = orig_img.shape[0]
                 # imgwidth = orig_img.shape[1]
@@ -263,7 +266,7 @@ class DetectionLoader():
 
                 # inps, cropped_boxes = self.transformation.align_transform(orig_img, boxes)
 
-                self.wait_and_put(self.pose_queue, (inps, orig_img, im_name, boxes, scores, ids, cropped_boxes))
+                self.wait_and_put(self.pose_queue, (inps, orig_img, im_name, boxes, scores, ids, cropped_boxes, cls))
 
     def read(self):
         return self.wait_and_get(self.pose_queue)

@@ -677,12 +677,14 @@ def write_json(all_results, outputpath, form=None, for_eval=False, outputfile='a
             kp_preds = human['keypoints']
             kp_scores = human['kp_score']
             pro_scores = human['proposal_score']
+            cls = human['cls']
             for n in range(kp_scores.shape[0]):
                 keypoints.append(float(kp_preds[n, 0]))
                 keypoints.append(float(kp_preds[n, 1]))
                 keypoints.append(float(kp_scores[n]))
             result['keypoints'] = keypoints
             result['score'] = float(pro_scores)
+            result['cls'] = int(cls)
             if 'box' in human.keys():
                 result['box'] = human['box']
             #pose track results by PoseFlow

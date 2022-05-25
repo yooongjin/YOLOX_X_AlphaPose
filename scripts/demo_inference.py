@@ -224,11 +224,11 @@ if __name__ == "__main__":
         for i in im_names_desc:
             start_time = getTime()
             with torch.no_grad():
-                (inps, orig_img, im_name, boxes, scores, ids, cropped_boxes) = det_loader.read()
+                (inps, orig_img, im_name, boxes, scores, ids, cropped_boxes, cls) = det_loader.read()
                 if orig_img is None:
                     break
                 if boxes is None or boxes.nelement() == 0:
-                    writer.save(None, None, None, None, None, orig_img, im_name)
+                    writer.save(None, None, None, None, None, orig_img, im_name, None)
                     continue
                 if args.profile:
                     ckpt_time, det_time = getTime(start_time)
@@ -257,7 +257,7 @@ if __name__ == "__main__":
                 if args.pose_track:
                     boxes,scores,ids,hm,cropped_boxes = track(tracker,args,orig_img,inps,boxes,hm,cropped_boxes,im_name,scores)
                 hm = hm.cpu()
-                writer.save(boxes, scores, ids, hm, cropped_boxes, orig_img, im_name)
+                writer.save(boxes, scores, ids, hm, cropped_boxes, orig_img, im_name, cls)
                 if args.profile:
                     ckpt_time, post_time = getTime(ckpt_time)
                     runtime_profile['pn'].append(post_time)

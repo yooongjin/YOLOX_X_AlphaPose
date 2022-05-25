@@ -105,9 +105,9 @@ class YOLODetector(BaseDetector):
             prediction = self.model(imgs) 
             #print(imgs.shape)
             #do nms to the detection results, only human category is left
-            dets = self.dynamic_write_results(prediction, 0.7, 
-                                              self.num_classes, nms=True, 
-                                              nms_conf=0.45)
+            dets = self.dynamic_write_results(prediction, confidence = self.confidence, 
+                                              num_classes = self.num_classes, nms=True, 
+                                              nms_conf=self.nms_thres)
             if isinstance(dets, int) or dets.shape[0] == 0:
                 return 0
             dets = dets.cpu()
@@ -142,7 +142,7 @@ class YOLODetector(BaseDetector):
         args = self.detector_opt
         #prediction: (batchsize, num of objects, (xc,yc,w,h,box confidence, 80 class scores))
         class_conf, class_pred = torch.max(prediction[:, :, 5: 5 + num_classes], 2, keepdim=True)
-        conf_mask = (prediction[:, :, 4] * class_conf.squeeze(2)  > torch.tensor([confidence]).cuda()).float().unsqueeze(2)
+        conf_mask = (prediction[:, :, 4]   > torch.tensor([confidence]).cuda()).float().unsqueeze(2)
         prediction = prediction * conf_mask
         try:
             ind_nz = torch.nonzero(prediction[:,:,4]).transpose(0,1).contiguous()
@@ -185,7 +185,6 @@ class YOLODetector(BaseDetector):
                 img_classes = unique(image_pred_[:,-1])
             except:
                 continue
-
             #WE will do NMS classwise
             #print(img_classes)
             for cls in img_classes:

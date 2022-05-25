@@ -95,7 +95,7 @@ class DataWriter():
         # keep looping infinitelyd
         while True:
             # ensure the queue is not empty and get item
-            (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name) = self.wait_and_get(self.result_queue)
+            (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name, cls) = self.wait_and_get(self.result_queue)
             if orig_img is None:
                 # if the thread indicator variable is set (img is None), stop the thread
                 if self.save_video:
@@ -153,7 +153,8 @@ class DataWriter():
                             'kp_score':preds_scores[k],
                             'proposal_score': torch.mean(preds_scores[k]) + scores[k] + 1.25 * max(preds_scores[k]),
                             'idx':ids[k],
-                            'box':[boxes[k][0], boxes[k][1], boxes[k][2]-boxes[k][0],boxes[k][3]-boxes[k][1]] 
+                            'box':[boxes[k][0], boxes[k][1], boxes[k][2]-boxes[k][0],boxes[k][3]-boxes[k][1]],
+                            'cls' : cls[k]
                         }
                     )
 
@@ -194,9 +195,9 @@ class DataWriter():
     def wait_and_get(self, queue):
         return queue.get()
 
-    def save(self, boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name):
+    def save(self, boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name, cls):
         # save next frame in the queue
-        self.wait_and_put(self.result_queue, (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name))
+        self.wait_and_put(self.result_queue, (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name, cls))
 
     def running(self):
         # indicate that the thread is still running
@@ -208,7 +209,7 @@ class DataWriter():
 
     def stop(self):
         # indicate that the thread should be stopped
-        self.save(None, None, None, None, None, None, None)
+        self.save(None, None, None, None, None, None, None, None)
         self.result_worker.join()
 
     def terminate(self):
