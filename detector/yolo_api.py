@@ -142,7 +142,7 @@ class YOLODetector(BaseDetector):
         args = self.detector_opt
         #prediction: (batchsize, num of objects, (xc,yc,w,h,box confidence, 80 class scores))
         class_conf, class_pred = torch.max(prediction[:, :, 5: 5 + num_classes], 2, keepdim=True)
-        conf_mask = (prediction[:, :, 4]   > torch.tensor([confidence]).cuda()).float().unsqueeze(2)
+        conf_mask = (prediction[:, :, 4] *class_conf.squeeze(2)  > torch.tensor([confidence]).cuda()).float().unsqueeze(2)
         prediction = prediction * conf_mask
         try:
             ind_nz = torch.nonzero(prediction[:,:,4]).transpose(0,1).contiguous()
