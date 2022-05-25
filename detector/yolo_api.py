@@ -17,8 +17,9 @@ from yolo.preprocess import prep_image, prep_frame
 from yolo.darknet import Darknet
 from yolo.util import unique
 from yolo.bbox import bbox_iou
-
+from yolox.exp import Exp
 from detector.apis import BaseDetector
+from yolox.utils.boxes import postprocess
 
 #only windows visual studio 2013 ~2017 support compile c/cuda extensions
 #If you force to compile extension on Windows and ensure appropriate visual studio
@@ -33,21 +34,31 @@ class YOLODetector(BaseDetector):
 
         self.detector_cfg = cfg
         self.detector_opt = opt
-        self.model_cfg = cfg.get('CONFIG', 'detector/yolo/cfg/yolov3-spp.cfg')
-        self.model_weights = cfg.get('WEIGHTS', 'detector/yolo/data/yolov3-spp.weights')
-        self.inp_dim = cfg.get('INP_DIM', 608)
+        #self.model_cfg = cfg.get('CONFIG', 'detector/yolo/cfg/yolov3-spp.cfg')
+        #self.model_weights = cfg.get('WEIGHTS', 'detector/yolo/data/yolov3-spp.weights')
+        self.inp_dim = 640
         self.nms_thres = cfg.get('NMS_THRES', 0.6)
         self.confidence = 0.3 if (False if not hasattr(opt, 'tracking') else opt.tracking) else cfg.get('CONFIDENCE', 0.05)
         self.num_classes = cfg.get('NUM_CLASSES', 80)
         self.model = None
+        
+        
+        self.exp = Exp()
+        #yolox_x setting
+        self.exp.depth= 1.33
+        self.exp.width = 1.25
+
 
     def load_model(self):
         args = self.detector_opt
 
-        print('Loading YOLO model..')
-        self.model = Darknet(self.model_cfg)
-        self.model.load_weights(self.model_weights)
-        self.model.net_info['height'] = self.inp_dim
+
+        print('Loading YOLOX model..')
+        self.model = self.exp.get_model()
+
+        ckpt_file = "C:\\Users\\user\\Desktop\\yolox_alphapose\\AlphaPose\\detector\\yolox\\checkpoints\\yolox_x.pth"
+        ckpt = torch.load(ckpt_file)
+        self.model.load_state_dict(ckpt["model"])
         
 
         if args:
@@ -91,11 +102,12 @@ class YOLODetector(BaseDetector):
             self.load_model()
         with torch.no_grad():
             imgs = imgs.to(args.device) if args else imgs.cuda()
-            prediction = self.model(imgs, args=args) 
+            prediction = self.model(imgs) 
+            #print(imgs.shape)
             #do nms to the detection results, only human category is left
-            dets = self.dynamic_write_results(prediction, self.confidence, 
+            dets = self.dynamic_write_results(prediction, 0.7, 
                                               self.num_classes, nms=True, 
-                                              nms_conf=self.nms_thres)
+                                              nms_conf=0.45)
             if isinstance(dets, int) or dets.shape[0] == 0:
                 return 0
             dets = dets.cpu()
@@ -111,24 +123,27 @@ class YOLODetector(BaseDetector):
 
             return dets
 
-    def dynamic_write_results(self, prediction, confidence, num_classes, nms=True, nms_conf=0.4):
+    def dynamic_write_results(self, prediction, confidence =0.7, num_classes =80, nms=True, nms_conf=0.45):
         prediction_bak = prediction.clone()
-        dets = self.write_results(prediction.clone(), confidence, num_classes, nms, nms_conf)
+        dets = self.write_results(prediction, confidence, num_classes, nms, nms_conf)
+        #dets = postprocess(prediction, num_classes=num_classes, conf_thre=0.4, nms_thre=0.45)
         if isinstance(dets, int):
+            print(dets)
             return dets
 
         if dets.shape[0] > 100:
             nms_conf -= 0.05
-            dets = self.write_results(prediction_bak.clone(), confidence, num_classes, nms, nms_conf)
-
+            #dets = postprocess(prediction.clone, num_classes=num_classes, conf_thre=0.7, nms_thre=0.45, )
+            dets = self.write_results(prediction_bak, confidence, num_classes, nms, nms_conf)
+        
         return dets
 
-    def write_results(self, prediction, confidence, num_classes, nms=True, nms_conf=0.4):
+    def write_results(self, prediction, confidence =0.7, num_classes =80,  nms=True, nms_conf=0.45):
         args = self.detector_opt
         #prediction: (batchsize, num of objects, (xc,yc,w,h,box confidence, 80 class scores))
-        conf_mask = (prediction[:, :, 4] > confidence).float().float().unsqueeze(2)
+        class_conf, class_pred = torch.max(prediction[:, :, 5: 5 + num_classes], 2, keepdim=True)
+        conf_mask = (prediction[:, :, 4] * class_conf.squeeze(2)  > torch.tensor([confidence]).cuda()).float().unsqueeze(2)
         prediction = prediction * conf_mask
-
         try:
             ind_nz = torch.nonzero(prediction[:,:,4]).transpose(0,1).contiguous()
         except:
@@ -141,7 +156,6 @@ class YOLODetector(BaseDetector):
         box_a[:,:,2] = (prediction[:,:,0] + prediction[:,:,2]/2) 
         box_a[:,:,3] = (prediction[:,:,1] + prediction[:,:,3]/2)
         prediction[:,:,:4] = box_a[:,:,:4]
-
         batch_size = prediction.size(0)
 
         output = prediction.new(1, prediction.size(2) + 1)
@@ -175,8 +189,8 @@ class YOLODetector(BaseDetector):
             #WE will do NMS classwise
             #print(img_classes)
             for cls in img_classes:
-                if cls != 0:
-                    continue
+                # if cls != 0:
+                #     continue
                 #get the detections with one particular class
                 cls_mask = image_pred_*(image_pred_[:,-1] == cls).float().unsqueeze(1)
                 class_mask_ind = torch.nonzero(cls_mask[:,-2]).squeeze()
@@ -234,6 +248,7 @@ class YOLODetector(BaseDetector):
         if not num:
             return 0
         #output:(n,(batch_ind,x1,y1,x2,y2,c,s,idx of cls))
+        #print(output)
         return output
 
     def detect_one_img(self, img_name):
