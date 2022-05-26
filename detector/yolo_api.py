@@ -253,7 +253,7 @@ class YOLODetector(BaseDetector):
         # print(output)
         # return output
 
-
+ 
     def detect_one_img(self, img_name):
         """
         Detect bboxs in one image
