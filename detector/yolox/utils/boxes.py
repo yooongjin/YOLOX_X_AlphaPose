@@ -37,7 +37,8 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
     box_corner[:, :, 3] = prediction[:, :, 1] + prediction[:, :, 3] / 2
     prediction[:, :, :4] = box_corner[:, :, :4]
 
-    output = [None for _ in range(len(prediction))]
+    #output = [0 for _ in range(len(prediction))]
+    output = torch.tensor([]).cuda()
     for i, image_pred in enumerate(prediction):
 
         # If none are remaining => process next image
@@ -48,7 +49,8 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
 
         conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= conf_thre).squeeze()
         # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-        detections = torch.cat((image_pred[:, :5], class_conf, class_pred.float()), 1)
+        detections = torch.cat((torch.tensor([i]*len(class_pred)).reshape(-1, 1).cuda(), image_pred[:, :5], class_conf, class_pred.float()), 1)
+        
         detections = detections[conf_mask]
         if not detections.size(0):
             continue
@@ -68,11 +70,14 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
             )
 
         detections = detections[nms_out_index]
-        if output[i] is None:
-            output[i] = detections
-        else:
-            output[i] = torch.cat((output[i], detections))
-
+        # if output[i] is None:
+        #     output[i] = detections
+        # else:
+        #     output[i] = torch.cat((output[i], detections))
+        
+        output = torch.concat((output, detections))
+    #print(output)
+ 
     return output
 
 def bboxes_iou(bboxes_a, bboxes_b, xyxy=True):

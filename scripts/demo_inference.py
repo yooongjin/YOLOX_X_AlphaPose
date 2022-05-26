@@ -83,6 +83,8 @@ parser.add_argument('--pose_flow', dest='pose_flow',
                     help='track humans in video with PoseFlow', action='store_true', default=False)
 parser.add_argument('--pose_track', dest='pose_track',
                     help='track humans in video with reid', action='store_true', default=False)
+parser.add_argument('--conf',  type=float, default=0.25)
+parser.add_argument('--nms', type=float, default=0.45)
 
 args = parser.parse_args()
 cfg = update_config(args.cfg)
