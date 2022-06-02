@@ -13,4 +13,5 @@ Original AlhpaPose : https://github.com/MVIG-SJTU/AlphaPose
 
 ### 개선점
 - Bounding Box 개선
-
+- Skeleton 개선
+- Object Detection 추가
