@@ -1,4 +1,6 @@
-# Detection & Bounding Box 개선
+# AlphaPose with yolov3 => yolox
+
+Original AlhpaPose : https://github.com/MVIG-SJTU/AlphaPose
 
 ## ■ YOLOX
 ![0005_c2_f0046985](https://user-images.githubusercontent.com/60573146/171554197-379f44e2-3344-4616-82d1-d0458f05e2b0.jpg)
