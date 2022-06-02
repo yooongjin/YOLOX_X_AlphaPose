@@ -230,8 +230,8 @@ class DetectionLoader():
                 dets = dets.cpu()
                 boxes = dets[:, 1:5]
                 scores = dets[:, 5:6]
-                cls = dets[:, -1].reshape(-1, 1)
-
+                cls = dets[:, 7:]
+                #print(dets)
                 if self.opt.tracking:
                     ids = dets[:, 6:7]
                     
@@ -245,8 +245,7 @@ class DetectionLoader():
                     continue
                 inps = torch.zeros(boxes_k.size(0), 3, *self._input_size)
                 cropped_boxes = torch.zeros(boxes_k.size(0), 4)
-                # print(boxes.shape)
-                # print(cls.shape)
+              
 
                 self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], boxes_k, scores[dets[:, 0] == k], ids[dets[:, 0] == k], inps, cropped_boxes, cls[dets[:, 0]==k]))
 
