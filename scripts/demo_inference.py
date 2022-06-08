@@ -69,6 +69,7 @@ parser.add_argument('--flip', default=False, action='store_true',
                     help='enable flip testing')
 parser.add_argument('--debug', default=False, action='store_true',
                     help='print detail information')
+
 """----------------------------- Video options -----------------------------"""
 parser.add_argument('--video', dest='video',
                     help='video-name', default="")
@@ -83,8 +84,11 @@ parser.add_argument('--pose_flow', dest='pose_flow',
                     help='track humans in video with PoseFlow', action='store_true', default=False)
 parser.add_argument('--pose_track', dest='pose_track',
                     help='track humans in video with reid', action='store_true', default=False)
+
+                    
 parser.add_argument('--conf',  type=float, default=0.25)
 parser.add_argument('--nms', type=float, default=0.45)
+parser.add_argument('--model_size', type=str, default="yolox_x")
 
 args = parser.parse_args()
 cfg = update_config(args.cfg)

@@ -244,7 +244,8 @@ class DetectionLoader():
                     self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], None, None, None, None, None, None))
                     continue
                 inps = torch.zeros(boxes_k.size(0), 3, *self._input_size)
-                cropped_boxes = torch.zeros(boxes_k.size(0), 4)
+                cropped_boxes = torch.zeros(boxes_k.size(0), 4) 
+
               
 
                 self.wait_and_put(self.det_queue, (orig_imgs[k], im_names[k], boxes_k, scores[dets[:, 0] == k], ids[dets[:, 0] == k], inps, cropped_boxes, cls[dets[:, 0]==k]))
@@ -257,7 +258,7 @@ class DetectionLoader():
                     self.wait_and_put(self.pose_queue, (None, None, None, None, None, None, None, None))
                     return
                 if boxes is None or boxes.nelement() == 0:
-                    self.wait_and_put(self.pose_queue, (None, orig_img, im_name, boxes, scores, ids, None, None))
+                    self.wait_and_put(self.pose_queue, (None, orig_img, im_name, boxes, scores, ids, None, cls))
                     continue
                 # imght = orig_img.shape[0]
                 # imgwidth = orig_img.shape[1]

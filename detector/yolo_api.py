@@ -39,14 +39,29 @@ class YOLODetector(BaseDetector):
         self.inp_dim = 640
         self.nms_thres = opt.nms
         self.confidence = opt.conf
+        self.model_size = opt.model_size
         self.num_classes = cfg.get('NUM_CLASSES', 80)
         self.model = None
         
         
         self.exp = Exp()
+
+        #yolox_s setting
+        if self.model_size == "yolox_s":
+            self.exp.depth = 0.33
+            self.exp.width = 0.50
+        #yolox_m setting
+        if self.model_size == "yolox_m":
+            self.exp.depth = 0.67
+            self.exp.width = 0.75
+        #yolox_l setting
+        if self.model_size == "yolox_l":
+            self.exp.depth = 1.0
+            self.exp.width = 1.0
         #yolox_x setting
-        self.exp.depth= 1.33
-        self.exp.width = 1.25
+        if self.model_size == "yolox_x":
+            self.exp.depth= 1.33
+            self.exp.width = 1.25
 
 
     def load_model(self):
@@ -55,8 +70,7 @@ class YOLODetector(BaseDetector):
 
         print('Loading YOLOX model..')
         self.model = self.exp.get_model()
-
-        ckpt_file = "C:\\Users\\user\\Desktop\\yolox_alphapose\\AlphaPose\\detector\\yolox\\checkpoints\\yolox_x.pth"
+        ckpt_file = f"C:\\Users\\user\\Desktop\\yolox_alphapose\\AlphaPose\\detector\\yolox\\checkpoints\\{self.model_size}.pth"
         ckpt = torch.load(ckpt_file)
         self.model.load_state_dict(ckpt["model"])
         
