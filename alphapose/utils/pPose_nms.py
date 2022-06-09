@@ -224,7 +224,7 @@ def _rescore(overlap, scores, thr, type='gaussian'):
 
     return scores
 
-def pose_nms(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres=0, use_heatmap_loss=True):
+def pose_nms(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, areaThres=0, use_heatmap_loss=True):
     if pose_preds.size()[1] == 136 or pose_preds.size()[1] == 133:
         if not use_heatmap_loss:
             global delta1, mu, delta2, gamma, scoreThreds, matchThreds, alpha
@@ -237,9 +237,9 @@ def pose_nms(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres=0
             alpha = 0.15
         return pose_nms_fullbody(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres)
     else:
-        return pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres)
+        return pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, areaThres)
 
-def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres=0):
+def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, areaThres=0):
     '''
     Parametric Pose NMS algorithm
     bboxes:         bbox locations list (n, 4)
@@ -249,7 +249,6 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaTh
     pose_scores:    pose scores list    (n, kp_num, 1)
     '''
     #global ori_pose_preds, ori_pose_scores, ref_dists
-
     pose_scores[pose_scores == 0] = 1e-5
     kp_nums = pose_preds.size()[1]
     res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids = [],[],[],[],[],[]
@@ -342,7 +341,8 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaTh
         res_pose_preds.append(merge_pose)
         res_pose_scores.append(merge_score)
         res_pick_ids.append(pick[j])
-
+    print(res_bboxes)
+    
     return res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids
 
 def pose_nms_fullbody(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres=0):
@@ -677,6 +677,7 @@ def write_json(all_results, outputpath, form=None, for_eval=False, outputfile='a
             kp_preds = human['keypoints']
             kp_scores = human['kp_score']
             pro_scores = human['proposal_score']
+            bbox_score = human['bbox_score']
             cls = human['cls']
             for n in range(kp_scores.shape[0]):
                 keypoints.append(float(kp_preds[n, 0]))
@@ -684,6 +685,7 @@ def write_json(all_results, outputpath, form=None, for_eval=False, outputfile='a
                 keypoints.append(float(kp_scores[n]))
             result['keypoints'] = keypoints
             result['score'] = float(pro_scores)
+            result['bbox_score'] = float(bbox_score)
             result['cls'] = int(cls)
             if 'box' in human.keys():
                 result['box'] = human['box']

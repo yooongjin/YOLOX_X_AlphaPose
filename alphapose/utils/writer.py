@@ -62,6 +62,7 @@ class DataWriter():
                 self.vis_thres = [0.4] * (num_joints - hand_face_num) + [0.05] * hand_face_num
 
         self.use_heatmap_loss = (self.cfg.DATA_PRESET.get('LOSS_TYPE', 'MSELoss') == 'MSELoss')
+        
 
     def start_worker(self, target):
         if self.opt.sp:
@@ -143,7 +144,7 @@ class DataWriter():
                 preds_scores = torch.cat(pose_scores)
                 if not self.opt.pose_track:
                     boxes, scores, ids, preds_img, preds_scores, pick_ids = \
-                        pose_nms(boxes, scores, ids, preds_img, preds_scores, self.opt.min_box_area, use_heatmap_loss=self.use_heatmap_loss)
+                        pose_nms(boxes, scores, ids, preds_img, preds_scores, cls, self.opt.min_box_area, use_heatmap_loss=self.use_heatmap_loss)
 
                 _result = []
                 for k in range(len(scores)):
@@ -152,6 +153,7 @@ class DataWriter():
                             'keypoints':preds_img[k],
                             'kp_score':preds_scores[k],
                             'proposal_score': torch.mean(preds_scores[k]) + scores[k] + 1.25 * max(preds_scores[k]),
+                            "bbox_score" : scores[k],
                             'idx':ids[k],
                             'box':[boxes[k][0], boxes[k][1], boxes[k][2]-boxes[k][0],boxes[k][3]-boxes[k][1]],
                             'cls' : cls[k]

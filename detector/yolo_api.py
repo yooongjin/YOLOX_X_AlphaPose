@@ -74,7 +74,6 @@ class YOLODetector(BaseDetector):
         ckpt = torch.load(ckpt_file)
         self.model.load_state_dict(ckpt["model"])
         
-
         if args:
             if len(args.gpus) > 1:
                 self.model = torch.nn.DataParallel(self.model, device_ids=args.gpus).to(args.device)
