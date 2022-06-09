@@ -247,17 +247,21 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
     bbox_ids:       bbox tracking ids list (n, 1)
     pose_preds:     pose locations list (n, kp_num, 2)
     pose_scores:    pose scores list    (n, kp_num, 1)
+    cls :           bbox Class (n, 1)
     '''
+  
     #global ori_pose_preds, ori_pose_scores, ref_dists
     pose_scores[pose_scores == 0] = 1e-5
     kp_nums = pose_preds.size()[1]
-    res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids = [],[],[],[],[],[]
-    
+    res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids, res_class = [],[],[],[],[],[], []
+
     ori_bboxes = bboxes.clone()
     ori_bbox_scores = bbox_scores.clone()
     ori_bbox_ids = bbox_ids.clone()
     ori_pose_preds = pose_preds.clone()
     ori_pose_scores = pose_scores.clone()
+    ori_cls = cls.clone()
+
 
     xmax = bboxes[:, 2]
     xmin = bboxes[:, 0]
@@ -300,11 +304,14 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
         mask[mask] = newmask
 
     assert len(merge_ids) == len(pick)
+    
+    # 위에서 고른 것
     preds_pick = ori_pose_preds[pick]
     scores_pick = ori_pose_scores[pick]
     bbox_scores_pick = ori_bbox_scores[pick]
     bboxes_pick = ori_bboxes[pick]
     bbox_ids_pick = ori_bbox_ids[pick]
+    cls_pick = ori_cls[pick]
     #final_result = pool.map(filter_result, zip(scores_pick, merge_ids, preds_pick, pick, bbox_scores_pick))
     #final_result = [item for item in final_result if item is not None]
 
@@ -330,6 +337,7 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
         ymin = min(merge_pose[:, 1])
         bbox = bboxes_pick[j].cpu().tolist()
         bbox_score = bbox_scores_pick[j].cpu()
+        _class = cls_pick[j].cpu()
 
         if (1.5 ** 2 * (xmax - xmin) * (ymax - ymin) < areaThres):
             continue
@@ -341,9 +349,12 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
         res_pose_preds.append(merge_pose)
         res_pose_scores.append(merge_score)
         res_pick_ids.append(pick[j])
+        res_class.append(_class)
+
+    
     print(res_bboxes)
     
-    return res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids
+    return res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids, res_class
 
 def pose_nms_fullbody(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres=0):
     '''

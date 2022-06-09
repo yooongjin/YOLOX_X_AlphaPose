@@ -143,7 +143,7 @@ class DataWriter():
                 preds_img = torch.cat(pose_coords)
                 preds_scores = torch.cat(pose_scores)
                 if not self.opt.pose_track:
-                    boxes, scores, ids, preds_img, preds_scores, pick_ids = \
+                    boxes, scores, ids, preds_img, preds_scores, pick_ids, cls = \
                         pose_nms(boxes, scores, ids, preds_img, preds_scores, cls, self.opt.min_box_area, use_heatmap_loss=self.use_heatmap_loss)
 
                 _result = []
