@@ -11,10 +11,11 @@ Original AlhpaPose : https://github.com/MVIG-SJTU/AlphaPose
 ![0005_c6_f0030883](https://user-images.githubusercontent.com/60573146/171554245-e929d584-c66c-4915-bf6d-d418e7c7e715.jpg)
 ![0019_c1_f0051470](https://user-images.githubusercontent.com/60573146/171554259-117d06d7-2732-4358-8231-64c98a0db5e7.jpg)
 
-### 개선점
+### YOLOv3 보다 개선된 점
 - Bounding Box 개선
 - Skeleton 개선
 - Object Detection 추가
+- Detector 하이퍼파라미터 조절 가능
 
 <pre>
 <code>
