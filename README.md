@@ -1,6 +1,10 @@
-# AlphaPose with yolov3 => yolox
+# AlphaPose Using YOLOX
 
 Original AlhpaPose : https://github.com/MVIG-SJTU/AlphaPose
+
+
+YOLOX : https://github.com/Megvii-BaseDetection/YOLOX
+
 
 ## ■ YOLOv3  →  YOLOX
 ![0005_c2_f0046985](https://user-images.githubusercontent.com/60573146/171554270-dd65d156-ff8c-4dcd-ba00-5f4deaf78c1b.jpg)
