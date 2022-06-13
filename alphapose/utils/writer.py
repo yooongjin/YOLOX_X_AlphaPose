@@ -142,10 +142,13 @@ class DataWriter():
                     pose_scores.append(torch.from_numpy(pose_score).unsqueeze(0))
                 preds_img = torch.cat(pose_coords)
                 preds_scores = torch.cat(pose_scores)
+                
                 if not self.opt.pose_track:
                     boxes, scores, ids, preds_img, preds_scores, pick_ids, cls = \
                         pose_nms(boxes, scores, ids, preds_img, preds_scores, cls, self.opt.min_box_area, use_heatmap_loss=self.use_heatmap_loss)
-
+                
+                if len(boxes) != len(cls):
+                    print("안돼애애애애애")
                 _result = []
                 for k in range(len(scores)):
                     _result.append(

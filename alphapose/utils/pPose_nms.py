@@ -249,19 +249,40 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
     pose_scores:    pose scores list    (n, kp_num, 1)
     cls :           bbox Class (n, 1)
     '''
-  
+    human_mask = cls == 0
+    n_human_mask = cls != 0
+    
+    human_mask = human_mask.reshape(-1)
+    n_human_mask = n_human_mask.reshape(-1)
+
     #global ori_pose_preds, ori_pose_scores, ref_dists
     pose_scores[pose_scores == 0] = 1e-5
     kp_nums = pose_preds.size()[1]
     res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids, res_class = [],[],[],[],[],[], []
+    # print()
+    # print(bboxes)
+    # print(bbox_scores)
+    # print(bbox_ids)
+    # print(pose_preds)
+    # print(pose_scores)
+    # print(cls)
 
-    ori_bboxes = bboxes.clone()
-    ori_bbox_scores = bbox_scores.clone()
-    ori_bbox_ids = bbox_ids.clone()
-    ori_pose_preds = pose_preds.clone()
-    ori_pose_scores = pose_scores.clone()
-    ori_cls = cls.clone()
+    ori_bboxes = bboxes[human_mask].clone()
+    ori_bbox_scores = bbox_scores[human_mask].clone()
+    ori_bbox_ids = bbox_ids[human_mask].clone()
+    ori_pose_preds = pose_preds[human_mask].clone()
+    ori_pose_scores = pose_scores[human_mask].clone()
+    ori_cls = cls[human_mask].clone()
 
+    obj_bboxes = bboxes[n_human_mask].clone().cpu()
+    obj_bbox_scores = bbox_scores[n_human_mask].clone().cpu()
+    obj_bbox_ids = bbox_ids[n_human_mask].clone()
+    obj_pose_preds = pose_preds[n_human_mask].clone()
+    obj_pose_scores = pose_scores[n_human_mask].clone()
+    obj_cls = cls[n_human_mask].clone().cpu() 
+
+    pose_preds = pose_preds[human_mask]
+    pose_scores =  pose_scores[human_mask]
 
     xmax = bboxes[:, 2]
     xmin = bboxes[:, 0]
@@ -272,7 +293,7 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
     heights = ymax - ymin
     ref_dists = alpha * np.maximum(widths, heights)
 
-    nsamples = bboxes.shape[0]
+    nsamples = ori_bboxes.shape[0]
     human_scores = pose_scores.mean(dim=1)
 
     human_ids = np.arange(nsamples)
@@ -308,6 +329,7 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
     # 위에서 고른 것
     preds_pick = ori_pose_preds[pick]
     scores_pick = ori_pose_scores[pick]
+
     bbox_scores_pick = ori_bbox_scores[pick]
     bboxes_pick = ori_bboxes[pick]
     bbox_ids_pick = ori_bbox_ids[pick]
@@ -350,10 +372,28 @@ def pose_nms_body(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, a
         res_pose_scores.append(merge_score)
         res_pick_ids.append(pick[j])
         res_class.append(_class)
+    
+    for i in range(len(obj_bboxes)):
+        res_bboxes.append(obj_bboxes[i].cpu().tolist())
+        res_bbox_scores.append(obj_bbox_scores[i])
+        res_bbox_ids.append(obj_bbox_ids[i].tolist())
+        res_pose_preds.append(torch.zeros(17, 2))
+        res_pose_scores.append(torch.zeros(17, 1))
+        
+        res_class.append(obj_cls[i])
+    # print()
+    # print("-------------")
+    # print(res_bboxes)
+    # print(res_bbox_scores)
+    # print(res_bbox_ids)
+    # print(res_pose_preds)
+    # print(res_pose_scores)
+    # print(res_pick_ids)
+    # print(res_class)
 
+    #print(res_class)
     
-    print(res_bboxes)
-    
+        
     return res_bboxes, res_bbox_scores, res_bbox_ids, res_pose_preds, res_pose_scores, res_pick_ids, res_class
 
 def pose_nms_fullbody(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres=0):
