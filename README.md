@@ -5,11 +5,13 @@ Original AlhpaPose : https://github.com/MVIG-SJTU/AlphaPose
 
 YOLOX : https://github.com/Megvii-BaseDetection/YOLOX
 
-# AlphaPose에서 수정한 것
+# Edited in AlphaPose
  - Detector : YOLOv3 => YOLOX 
  - Detector_NMS : YOLOXv3 => YOLOX
  - Detected Object : Only Human => All COCO object
  - PoseNMS for object class not human
+ - Writer write json_file for all object
+ - Save Image for object bounding box no Skeleton
 
 
 ## YOLOv3
