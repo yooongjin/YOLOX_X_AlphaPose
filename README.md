@@ -36,3 +36,7 @@ YOLOX : https://github.com/Megvii-BaseDetection/YOLOX
 python scripts/demo_inference.py --cfg ./configs/coco/resnet/256x192_res50_lr1e-3_1x.yaml --checkpoint ./pretrained_models/fast_res50_256x192.pth --indir "C:\Users\user\Desktop\RE-ID\datasets\DukeMTMC-reID\query" --outdir examples/yolox_x/all --save_img --showbox --conf 0.1 --nms 0.6 --model_size "yolox_x"
 </code>
 </pre>
+
+
+## License
+AlphaPose is freely available for free non-commercial use, and may be redistributed under these conditions. For commercial queries, please drop an e-mail at mvig.alphapose[at]gmail[dot]com and cc lucewu[[at]sjtu[dot]edu[dot]cn. We will send the detail agreement to you.
