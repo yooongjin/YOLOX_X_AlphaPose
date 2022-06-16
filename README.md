@@ -38,5 +38,7 @@ python scripts/demo_inference.py --cfg ./configs/coco/resnet/256x192_res50_lr1e-
 </pre>
 
 
-## License
+## AlphaPose License
 AlphaPose is freely available for free non-commercial use, and may be redistributed under these conditions. For commercial queries, please drop an e-mail at mvig.alphapose[at]gmail[dot]com and cc lucewu[[at]sjtu[dot]edu[dot]cn. We will send the detail agreement to you.
+
+for commercial queries you should contact AlphaPose developer
