@@ -35,7 +35,7 @@ YOLOX : https://github.com/Megvii-BaseDetection/YOLOX
 <code>
 python setup.py build develop
 </code>
-<pre>
+</pre>
 
 <pre>
 <code>
