@@ -33,6 +33,8 @@ YOLOX : https://github.com/Megvii-BaseDetection/YOLOX
 # Install
 <pre>
 <code>
+git clone https://github.com/HJSIFEN/YOLOX_X_AlphaPose.git
+cd yolox_x_alphapose
 python setup.py build develop
 </code>
 </pre>
