@@ -42,7 +42,7 @@ python setup.py build develop
 
 # Demo Inference
 
-
+datasize : ["yolox_s", "yolox_m", "yolox_l", "yolox_m"]
 <pre>
 <code>
 python scripts/demo_inference.py --cfg ./configs/coco/resnet/256x192_res50_lr1e-3_1x.yaml --checkpoint ./pretrained_models/fast_res50_256x192.pth --indir {input_dir} --outdir {output_dir} --save_img --showbox --conf 0.1 --nms 0.6 --model_size "yolox_x"
