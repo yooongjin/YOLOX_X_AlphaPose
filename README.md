@@ -41,7 +41,7 @@ python setup.py build develop
 
 <pre>
 <code>
-python scripts/demo_inference.py --cfg ./configs/coco/resnet/256x192_res50_lr1e-3_1x.yaml --checkpoint ./pretrained_models/fast_res50_256x192.pth --indir "C:\Users\user\Desktop\RE-ID\datasets\DukeMTMC-reID\query" --outdir examples/yolox_x/all --save_img --showbox --conf 0.1 --nms 0.6 --model_size "yolox_x"
+python scripts/demo_inference.py --cfg ./configs/coco/resnet/256x192_res50_lr1e-3_1x.yaml --checkpoint ./pretrained_models/fast_res50_256x192.pth --indir {input_dir} --outdir {output_dir} --save_img --showbox --conf 0.1 --nms 0.6 --model_size "yolox_x"
 </code>
 </pre>
 
