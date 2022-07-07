@@ -150,7 +150,9 @@ class DataWriter():
                 if len(boxes) != len(cls):
                     print("안돼애애애애애")
                 _result = []
-                for k in range(len(scores)):
+                print(cls)
+                for k in range(len(cls)):
+
                     _result.append(
                         {
                             'keypoints':preds_img[k],

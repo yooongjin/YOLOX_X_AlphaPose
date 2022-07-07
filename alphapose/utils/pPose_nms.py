@@ -231,9 +231,9 @@ def pose_nms(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, cls, areaTh
             delta1 = 1.0
             mu = 1.65
             delta2 = 8.0
-            gamma = 3.6
+            gamma = 3.6 #3.6
             scoreThreds = 0.01
-            matchThreds = 3.0
+            matchThreds = 3 #3.0
             alpha = 0.15
         return pose_nms_fullbody(bboxes, bbox_scores, bbox_ids, pose_preds, pose_scores, areaThres)
     else:

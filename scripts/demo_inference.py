@@ -89,6 +89,7 @@ parser.add_argument('--pose_track', dest='pose_track',
 parser.add_argument('--conf',  type=float, default=0.25)
 parser.add_argument('--nms', type=float, default=0.45)
 parser.add_argument('--model_size', type=str, default="yolox_x")
+parser.add_argument('--image_size', type=int, default=640)
 
 args = parser.parse_args()
 cfg = update_config(args.cfg)

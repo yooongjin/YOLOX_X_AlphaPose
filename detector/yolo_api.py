@@ -36,7 +36,7 @@ class YOLODetector(BaseDetector):
         self.detector_opt = opt
         #self.model_cfg = cfg.get('CONFIG', 'detector/yolo/cfg/yolov3-spp.cfg')
         #self.model_weights = cfg.get('WEIGHTS', 'detector/yolo/data/yolov3-spp.weights')
-        self.inp_dim = 640
+        self.inp_dim = opt.image_size
         self.nms_thres = opt.nms
         self.confidence = opt.conf
         self.model_size = opt.model_size
@@ -95,7 +95,6 @@ class YOLODetector(BaseDetector):
             img, orig_img, im_dim_list = prep_frame(img_source, self.inp_dim)
         else:
             raise IOError('Unknown image source type: {}'.format(type(img_source)))
-
         return img
 
     def images_detection(self, imgs, orig_dim_list):
